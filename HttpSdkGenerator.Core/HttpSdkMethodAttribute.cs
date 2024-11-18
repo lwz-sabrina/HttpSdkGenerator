@@ -7,7 +7,7 @@ namespace HttpSdkGenerator.Core
         public HttpSdkMethodAttribute(
             string method,
             string httpUrl,
-            string contentType = "application/json"
+            string contentType = ContentType.None
         )
         {
             Method = method;

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace HttpSdkGenerator.Core
@@ -6,6 +7,13 @@ namespace HttpSdkGenerator.Core
     [Generator(LanguageNames.CSharp)]
     public class SourceGenerator : ISourceGenerator
     {
+        private Dictionary<string, IComponentSource> sources =
+            new()
+            {
+                { "root", new RootComponentSource() },
+                { "httpapi", new HttpComponentSource() }
+            };
+
         public void Execute(GeneratorExecutionContext context)
         {
             var compilation = context.Compilation;
@@ -17,26 +25,22 @@ namespace HttpSdkGenerator.Core
             {
                 return;
             }
-            var groupMethodSymbols = receiver.MethodSymbols.GroupBy(x => new
-            {
-                Namespace = x.ContainingNamespace.ToString(),
-                ClassName = x.ContainingType.Name
-            });
+            var groupMethodSymbols = receiver
+                .MethodSymbols.GroupBy(x => new GroupClass
+                {
+                    NamespaceName = x.ContainingNamespace.ToString(),
+                    ClassName = x.ContainingType.Name
+                })
+                .ToList();
             foreach (var group in groupMethodSymbols)
             {
                 // 获取方法的类名称
                 var className = group.Key.ClassName;
-                // 获取命名空间名称
-                var namespaceName = group.Key.Namespace;
-                string main = SourceGeneratorTool.GetRootSource(namespaceName, className);
-                context.AddSource($"{className}.main.g.cs", main);
-                string clientApi = SourceGeneratorTool.GetHttpClientSource(
-                    namespaceName,
-                    className,
-                    compilation,
-                    group
-                );
-                context.AddSource($"{className}.clientapi.cs", clientApi);
+                foreach (var source in sources)
+                {
+                    string clientApi = source.Value.GetSource(compilation, group);
+                    context.AddSource($"{className}.{source.Key}.g.cs", clientApi);
+                }
             }
         }
 
