@@ -106,7 +106,6 @@ namespace {{namespaceName}}
             var contentParameter = methodSymbol
                 .Parameters.Where(x => x.Type.Name != typeof(CancellationToken).Name)
                 .Select(x => x.Name);
-            string contentParameterString = string.Join(", ", contentParameter);
             // 获取CancellationToken参数
             var cancellationTokenParameter =
                 methodSymbol
@@ -122,10 +121,26 @@ namespace {{namespaceName}}
         SendAsync($"{{uri}}", 
             new HttpMethod("{{method}}"),
             new StringContent(
-                JsonSerializer.Serialize(new { {{contentParameterString}} }),
+                JsonSerializer.Serialize(new { {{string.Join(", ", contentParameter)}} }),
                 System.Text.Encoding.UTF8,
                 "application/json"
             ) , 
+            {{cancellationTokenParameter}});
+
+""";
+                case ContentType.FormUrlEncoded:
+                    return $$"""
+{{methodSyntax.Modifiers}} Task<HttpResponseMessage> {{methodSymbol.Name}}({{methodSyntax
+                  .ParameterList
+                  .Parameters}}) =>
+        SendAsync($"{{uri}}", 
+            new HttpMethod("{{method}}"),
+            new FormUrlEncodedContent([{{string.Join(
+                        ", ",
+                        contentParameter.Select(x =>
+                            $"new KeyValuePair<string, string>(\"{x}\", {x})"
+                        )
+                    )}}]) ,
             {{cancellationTokenParameter}});
 
 """;

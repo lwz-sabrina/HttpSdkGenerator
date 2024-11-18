@@ -8,11 +8,9 @@ var serviceProvider = new ServiceCollection()
     .AddTransient<HttpSdkManager>()
     .BuildServiceProvider();
 var manager = serviceProvider.GetRequiredService<HttpSdkManager>();
-var users = await manager.CreateOrUpdateProcess(
-    new Guid("99d07f0c-edd4-44f1-ad4b-b7aa6de577d8"),
-    "chrome",
-    "谷歌浏览器",
-    true
+var users = await manager.GetToken(
+    "06e21869c8774bf48837aaf14eee49d5",
+    "8990d9f47e8cdb1b82ce19be23432af9"
 );
 var content = await users.Content.ReadAsStringAsync();
 Console.WriteLine(content);
