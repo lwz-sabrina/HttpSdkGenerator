@@ -1,6 +1,7 @@
-﻿using System.Net.Http.Headers;
+﻿using System;
+using System.Net.Http.Headers;
 
-namespace HttpSdkGenerator.Abstract
+namespace HttpSdkGenerator.Core
 {
     public abstract class AbstractHttpSdkManager
     {

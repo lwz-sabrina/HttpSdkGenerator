@@ -2,9 +2,9 @@
 
 namespace HttpSdkGenerator.Core
 {
-    public class HttpSdkMethodAttribute : Attribute
+    public class HttpMappingAttribute : Attribute
     {
-        public HttpSdkMethodAttribute(
+        public HttpMappingAttribute(
             string method,
             string httpUrl,
             string contentType = ContentType.None

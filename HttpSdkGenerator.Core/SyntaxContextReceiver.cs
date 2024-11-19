@@ -32,7 +32,7 @@ namespace HttpSdkGenerator.Core
             var semanticModel = context.SemanticModel;
             var compilation = semanticModel.Compilation;
             var attributeSymbol = compilation.GetTypeByMetadataName(
-                typeof(HttpSdkMethodAttribute).FullName
+                typeof(HttpMappingAttribute).FullName
             );
             var methodSymbol = semanticModel.GetDeclaredSymbol(methodDeclarationSyntax);
             if (attributeSymbol is null)

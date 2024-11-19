@@ -48,20 +48,37 @@ namespace {{namespaceName}}
             foreach (var methodSymbol in methodSymbols)
             {
                 var attributeSymbol =
-                    compilation.GetTypeByMetadataName(typeof(HttpSdkMethodAttribute).FullName)
-                    ?? throw new ArgumentException("Cannot find HttpSdkMethodAttribute");
+                    compilation.GetTypeByMetadataName(typeof(HttpMappingAttribute).FullName)
+                    ?? throw new ArgumentException("Cannot find HttpMappingAttribute");
                 var method = GetAttributeArgument(methodSymbol, attributeSymbol, 0).ToString();
                 var uri = GetAttributeArgument(methodSymbol, attributeSymbol, 1).ToString();
-
-                switch (method.ToLower())
+                switch (method)
                 {
-                    case "get":
+                    case Method.Get:
                         builder.Append(GetMethodSource(methodSymbol, uri, method));
                         break;
-                    case "post":
-                        var contentType = GetAttributeArgument(methodSymbol, attributeSymbol, 2)
-                            .ToString();
-                        builder.Append(PostMethodSource(methodSymbol, uri, method, contentType));
+                    case Method.Post:
+                        builder.Append(
+                            PostMethodSource(
+                                methodSymbol,
+                                uri,
+                                method,
+                                GetAttributeArgument(methodSymbol, attributeSymbol, 2).ToString()
+                            )
+                        );
+                        break;
+                    case Method.Put:
+                        builder.Append(
+                            PostMethodSource(
+                                methodSymbol,
+                                uri,
+                                method,
+                                GetAttributeArgument(methodSymbol, attributeSymbol, 2).ToString()
+                            )
+                        );
+                        break;
+                    case Method.Delete:
+                        builder.Append(GetMethodSource(methodSymbol, uri, method));
                         break;
                     default:
                         throw new ArgumentException($"Unsupported HTTP method: {method}");
@@ -109,9 +126,9 @@ namespace {{namespaceName}}
             // 获取CancellationToken参数
             var cancellationTokenParameter =
                 methodSymbol
-                    .Parameters.FirstOrDefault(x => x.Type.Name == "CancellationToken")
+                    .Parameters.FirstOrDefault(x => x.Type.Name == typeof(CancellationToken).Name)
                     ?.Name ?? "default";
-            switch (contentType.ToLower())
+            switch (contentType)
             {
                 case ContentType.Json:
                     return $$"""
